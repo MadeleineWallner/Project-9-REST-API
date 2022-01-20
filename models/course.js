@@ -1,14 +1,32 @@
-const { DataTypes } = require("sequelize/dist");
+const { Model, DataTypes } = require('sequelize');
 const Sequelize = require('sequelize');
 
 module.exports = ( sequelize ) => {
     class Course extends Model {}
     Course.init({
         title: {
-            type: Sequelize.STRING
+            type: Sequelize.STRING,
+            allowNull: false,
+            validate: {
+                notNull: {
+                    msg: 'A title is required'
+                },
+                notEmpty: {
+                    msg: 'Please provide a title'
+                }
+            }
         },
         description: {
-            type: Sequelize.TEXT
+            type: Sequelize.TEXT,
+            allowNull: false,
+            validate: {
+                notNull: {
+                    msg: 'A description is required'
+                },
+                notEmpty: {
+                    msg: 'Please provide a description'
+                }
+            }
         },
         estimatedTime: {
             type: Sequelize.STRING
