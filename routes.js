@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const {User, Course} = require('./models');
+const {authenticateUser} = require('./middleware/authenticate-user')
 
 // Asynchandler
 function asyncHandler(cb){
@@ -16,9 +17,15 @@ function asyncHandler(cb){
 }
 
 //GET route that returns all properties and values for the currently authenticated user along with a 200 HTTP status code
-router.get('/users', asyncHandler(async (req ,res) => {
-    let users = await User.findAll();
-    res.json(users);
+router.get('/users', authenticateUser, asyncHandler(async (req ,res) => {
+    const user = req.currentUser;
+    res.status(200).json({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        emailAddress: user.emailAddress,
+        password: user.password,
+        userId: user.userId
+    });
 }));
 
 //POST route that creates a new user, sets the location header to '/' and return a 201 HTTP status code and no content
