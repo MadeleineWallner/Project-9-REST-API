@@ -1,10 +1,15 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model } = require('sequelize');
 const Sequelize = require('sequelize');
 
 module.exports = ( sequelize ) => {
     class Course extends Model {}
     Course.init({
-        title: {
+            id: {
+                type: Sequelize.INTEGER,
+                primaryKey: true,
+                autoIncrement: true,
+            },
+            title: {
             type: Sequelize.STRING,
             allowNull: false,
             validate: {
