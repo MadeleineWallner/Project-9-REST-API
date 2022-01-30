@@ -1,18 +1,18 @@
 'use strict'
 
-const Sequelize = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const bcrypt = require('bcrypt');
 
 module.exports = (sequelize) => {
-    class User extends Sequelize.Model {}
+    class User extends Model {}
     User.init({
         id: {
-            type: Sequelize.INTEGER,
+            type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
         },
         firstName: {
-            type: Sequelize.STRING,
+            type: DataTypes.STRING,
             allowNull: false,
             validate: {
                 notNull: {
@@ -24,7 +24,7 @@ module.exports = (sequelize) => {
             }
         },
         lastName: {
-            type: Sequelize.STRING,
+            type: DataTypes.STRING,
             allowNull: false,
             validate: {
                 notNull: {
@@ -36,7 +36,7 @@ module.exports = (sequelize) => {
             }
         },
         emailAddress: {
-            type: Sequelize.STRING,
+            type: DataTypes.STRING,
             allowNull: false,
             unique: {
                 msg: 'The email you entered already exists'
@@ -51,7 +51,7 @@ module.exports = (sequelize) => {
       }    
         },
         password: {
-            type: Sequelize.STRING,
+            type: DataTypes.STRING,
             allowNull: false,
             set(val) {
                 const hashedPassword = bcrypt.hashSync(val, 10);

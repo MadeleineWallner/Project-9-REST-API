@@ -44,7 +44,7 @@ router.get('/courses', asyncHandler(async (req, res) => {
     let courses = await Course.findAll({
         include: [
             {
-                model: User,
+                model: User
             }
         ]
     });
@@ -83,15 +83,14 @@ router.post('/courses', asyncHandler(async (req, res) => {
 
 // PUT route that updates the corresponding course and return a 204 HTTP status code
 router.put('/courses/:id', asyncHandler(async (req, res) => {
-    let course;
     try {
-        course = await Course.findByPk(req.params.id);
+        const course = await Course.findByPk(req.params.id);
         await course.update(req.body);
         res.status(204).end();
     } catch (error){
         console.log('ERROR: ', error.name);
         
-        if(error.name === "SequelizeValidationError"){
+        if(error.name === "SequelizeValidationError" || error.name === 'SequelizeUniqueConstraintError'){
             const errors = error.errors.map(err => err.message);
             res.status(400).json({ errors });
         } else {
