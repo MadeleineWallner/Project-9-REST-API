@@ -35,13 +35,15 @@ router.post('/users', asyncHandler(async (req ,res) => {
 
 // Course Routes
 
-// GET route that returns all courses including the User associated with each course and a 200 HTTP status code. Exclude 'createdAt' and 'updatedAt'.
+// GET route that returns all courses including the User associated with each course and a 200 HTTP status code. 
 router.get('/courses', asyncHandler(async (req, res) => {
     let courses = await Course.findAll({
         attributes: {exclude: ['createdAt', 'updatedAt']},
         include: [
             {
-                model: User
+                model: User, attributes: {
+                    exclude: ['createdAt', 'updatedAt', 'password']
+                }
             }
         ],
     });
@@ -49,13 +51,16 @@ router.get('/courses', asyncHandler(async (req, res) => {
 
 }));
 
-// GET route that returns the corresponding course including the User associated with that course and a 200 HTTP status code
+// GET route that returns the corresponding course and a 200 HTTP status code
 router.get('/courses/:id', asyncHandler(async (req, res) => {
     let courseId = await Course.findByPk(req.params.id, {
         attributes: {exclude: ['createdAt', 'updatedAt']},
+// including the User associated with the course, exclude 'createdAt', 'updatedAt' and 'password        
         include: [
             {
-                model: User,
+                model: User, attributes: {
+                    exclude: ['createdAt', 'updatedAt', 'password']
+                }
             }
         ]
     });
@@ -82,45 +87,47 @@ router.post('/courses',  authenticateUser, asyncHandler(async (req, res) => {
 // PUT route that updates the corresponding course and return a 204 HTTP status code
 router.put('/courses/:id',  authenticateUser, asyncHandler(async (req, res) => {
     const course = await Course.findByPk(req.params.id);
-    const user = await User.findByPk(req.currentUser.id);
+    const courseOwner = await User.findByPk(course.userId);
 // If the currently authenticated user is the owner of the course - update the course. If not - return a 403 http status code
-    if(course.dataValues.id === user.dataValues.id){
-    try {      
-            const course = await Course.findByPk(req.params.id);
-            await course.update(req.body);
-            res.status(204).end();
-    } catch (error){
-        console.log('ERROR: ', error.name);
-        
-        if(error.name === "SequelizeValidationError" || error.name === 'SequelizeUniqueConstraintError'){
-            const errors = error.errors.map(err => err.message);
-            res.status(400).json({ errors });
-        } else {
-            throw error;
+    if(courseOwner.id === req.currentUser.id){
+        try {      
+                const course = await Course.findByPk(req.params.id);
+                await course.update(req.body);
+                res.status(204).end();
+        } catch (error){
+            console.log('ERROR: ', error.name);
+            
+            if(error.name === "SequelizeValidationError" || error.name === 'SequelizeUniqueConstraintError'){
+                const errors = error.errors.map(err => err.message);
+                res.status(400).json({ errors });
+            } else {
+                throw error;
+            }
         }
-    }
-} else {
-    res.status(403).json({message: "Access denied"});  
-}
+        } else {
+            res.status(403).json({message: "Access denied"});  
+        }
 }
 ));
 
 // DELETE route that deletes the corresponding course and return a 204 HTTP status code 
 router.delete('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
     const course = await Course.findByPk(req.params.id);
-    const user = await User.findByPk(req.currentUser.id);
+    const courseOwner = await User.findByPk(course.userId);
+
     // If the currently authenticated user is the owner of the course - delete it. Else - return a 403 http status code 
-    if(course.dataValues.id === user.dataValues.id){
+    if(courseOwner.id === req.currentUser.id){
         try {
             await course.destroy();
             res.status(204).end();
-        } catch {
+        } catch (error) {
             throw error();
         }
     } else {
         res.status(403).json({message: "Access denied"});  
     }
 
+   
 }));
 
 
